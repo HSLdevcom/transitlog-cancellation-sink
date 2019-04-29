@@ -5,6 +5,15 @@
 Application for inserting various events related to trips to PostgreSQL.
 These events are f.ex trip cancellations, service alerts, etc.
 
+
+## Setup:
+
+Setup the PostgreSQL database using the [db-init-script](schema/init.sql):
+
+```   
+psql -h localhost -d template1 -U postgres -f ./schema/init.sql 
+```   
+
 ## Building
 
 ### Dependencies
