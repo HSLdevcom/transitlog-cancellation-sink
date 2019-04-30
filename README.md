@@ -2,8 +2,7 @@
 
 ## Description
 
-Application for inserting various events related to trips to PostgreSQL.
-These events are f.ex trip cancellations, service alerts, etc.
+Application for inserting trip cancellations to PostgreSQL.
 
 
 ## Setup:
