@@ -1,4 +1,4 @@
-package fi.hsl.transitlog.events;
+package fi.hsl.transitlog.cancellations;
 
 import com.typesafe.config.Config;
 import fi.hsl.common.config.ConfigParser;

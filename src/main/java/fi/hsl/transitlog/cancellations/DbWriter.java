@@ -1,4 +1,4 @@
-package fi.hsl.transitlog.events;
+package fi.hsl.transitlog.cancellations;
 
 import com.typesafe.config.Config;
 import org.slf4j.Logger;

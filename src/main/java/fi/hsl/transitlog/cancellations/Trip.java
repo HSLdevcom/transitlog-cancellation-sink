@@ -1,4 +1,4 @@
-package fi.hsl.transitlog.events;
+package fi.hsl.transitlog.cancellations;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
