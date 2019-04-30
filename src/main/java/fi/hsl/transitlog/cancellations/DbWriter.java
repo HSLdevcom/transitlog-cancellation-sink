@@ -41,7 +41,7 @@ public class DbWriter {
                 .append("start_time, ")
                 .append("ext_id_dvj")
                 .append(") VALUES (")
-                .append("?, ?, ?, ?, ?, ?")
+                .append("?::CANCELLATION_STATUS, ?, ?, ?, ?, ?")
                 .append(");")
                 .toString();
     }
