@@ -28,7 +28,7 @@ public class MessageProcessor implements IMessageHandler {
     public void handleMessage(Message message) throws Exception {
         if (TransitdataSchema.hasProtobufSchema(message, TransitdataProperties.ProtobufSchema.InternalMessagesTripCancellation)) {
             InternalMessages.TripCancellation cancellation = InternalMessages.TripCancellation.parseFrom(message.getData());
-            //TODO write to db
+            writer.insert(cancellation);
         }
         else {
             log.warn("Invalid protobuf schema");

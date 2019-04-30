@@ -1,6 +1,7 @@
 package fi.hsl.transitlog.cancellations;
 
 import com.typesafe.config.Config;
+import fi.hsl.common.transitdata.proto.InternalMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,50 +24,44 @@ public class DbWriter {
 
         log.info("Connecting to the database with connection string " + connectionString);
         Connection conn = DriverManager.getConnection(connectionString, user, password);
-        //conn.setAutoCommit(false); // we're doing batch inserts so no auto commit
+        conn.setAutoCommit(true);
         log.info("Connection success");
         return new DbWriter(conn);
     }
 
     private String createInsertStatement() {
         return new StringBuffer()
-                .append("INSERT INTO TRIP (")
+                .append("INSERT INTO CANCELLATION (")
+                .append("status, ")
                 .append("start_date, ")
                 .append("route_id, ")
                 .append("direction_id, ")
                 .append("start_time, ")
-                .append("json_schema_version, ")
-                .append("trip_data, ")
                 .append("ext_id_dvj")
                 .append(") VALUES (")
-                .append("?, ?, ?, ?, ?, ?, ?")
+                .append("?, ?, ?, ?, ?, ?")
                 .append(");")
                 .toString();
     }
 
-    public void insert(Trip trip) throws Exception {
+    public void insert(InternalMessages.TripCancellation cancellation) throws Exception {
 
         long startTime = System.currentTimeMillis();
         String queryString = createInsertStatement();
         try (PreparedStatement statement = connection.prepareStatement(queryString)) {
             int index = 1;
 
-            setNullable(index++, trip.startDate, Types.DATE, statement);
-            setNullable(index++, trip.routeId, Types.VARCHAR, statement);
-            setNullable(index++, trip.directionId, Types.INTEGER, statement);
-            setNullable(index++, trip.startTime30HourClock, Types.VARCHAR, statement);
-            statement.setInt(index++, Trip.JSON_SCHEMA_VERSION);
+            statement.setString(index++, cancellation.getStatus().toString());
 
-            String jsonAsString = trip.tripData.toString(); //TODO  null check
-            setNullable(index++, jsonAsString, Types.VARCHAR, statement);
-
-            setNullable(index++, trip.dvjId.orElseGet(null), Types.VARCHAR, statement);
+            setNullable(index++, cancellation.getStartDate(), Types.DATE, statement);
+            setNullable(index++, cancellation.getRouteId(), Types.VARCHAR, statement);
+            setNullable(index++, cancellation.getDirectionId(), Types.INTEGER, statement);
+            setNullable(index++, cancellation.getStartTime(), Types.VARCHAR, statement);
+            setNullable(index++, cancellation.getTripId(), Types.VARCHAR, statement);
             statement.execute();
-            connection.commit();
         }
         catch (Exception e) {
-            log.error("Failed to insert to database: ", e);
-            connection.rollback();
+            log.error("Failed to insert cancellation to database: ", e);
             throw e;
         }
         finally {

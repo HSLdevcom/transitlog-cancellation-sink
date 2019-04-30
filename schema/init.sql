@@ -2,7 +2,7 @@
 
 SET ROLE creator;
 
-CREATE TYPE CANCELLATION_STATUS AS ENUM ('cancelled', 'running');
+CREATE TYPE CANCELLATION_STATUS AS ENUM ('RUNNING', 'CANCELED');
 
 CREATE TABLE cancellation (
     id                    BIGSERIAL PRIMARY KEY,
