@@ -1,5 +1,7 @@
 -- TODO Once finished put the Schema to some other repository, here just for bootstrapping the development.
 
+\c vehicles
+
 SET ROLE creator;
 
 CREATE TYPE CANCELLATION_STATUS AS ENUM ('RUNNING', 'CANCELED');
@@ -19,8 +21,10 @@ CREATE TABLE cancellation (
 CREATE INDEX cancellation_start_date_time_idx ON cancellation(start_date, start_time);
 CREATE INDEX cancellation_trip_identifier_tuple_idx ON cancellation(start_date, route_id, direction_id, start_time);
 
-GRANT INSERT ON TABLE cancellation TO hfp_writer;
+GRANT INSERT, UPDATE ON TABLE cancellation TO hfp_writer;
 GRANT SELECT ON TABLE cancellation TO PUBLIC;
+
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA PUBLIC TO hfp_writer;
 
 -- TimescaleDB Hypertable required?
 -- SELECT create_hypertable('trip_events',
