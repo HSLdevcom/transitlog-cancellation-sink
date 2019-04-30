@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 
 public class DbWriter {
@@ -53,7 +55,8 @@ public class DbWriter {
 
             statement.setString(index++, cancellation.getStatus().toString());
 
-            setNullable(index++, cancellation.getStartDate(), Types.DATE, statement);
+            Date startDate = parseDateFromCancellation(cancellation.getStartDate());
+            setNullable(index++, startDate, Types.DATE, statement);
             setNullable(index++, cancellation.getRouteId(), Types.VARCHAR, statement);
             setNullable(index++, cancellation.getDirectionId(), Types.INTEGER, statement);
             setNullable(index++, cancellation.getStartTime(), Types.VARCHAR, statement);
@@ -68,6 +71,12 @@ public class DbWriter {
             long elapsed = System.currentTimeMillis() - startTime;
             log.info("Total insert time: {} ms", elapsed);
         }
+    }
+
+    Date parseDateFromCancellation(String dateString) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        java.util.Date date = sdf.parse(dateString);
+        return new java.sql.Date(date.getTime());
     }
 
     private void setNullable(int index, Object value, int jdbcType, PreparedStatement statement) throws SQLException {
