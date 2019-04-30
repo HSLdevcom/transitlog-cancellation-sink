@@ -42,7 +42,7 @@ public class DbWriter {
                 .append("ext_id_dvj")
                 .append(") VALUES (")
                 .append("?::CANCELLATION_STATUS, ?, ?, ?, ?, ?")
-                .append(");")
+                .append(") ON CONFLICT DO NOTHING;") // Let's just ignore duplicates
                 .toString();
     }
 

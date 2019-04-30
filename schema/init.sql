@@ -18,6 +18,8 @@ CREATE TABLE cancellation (
     ext_id_dvj            TEXT -- Optional field for dvj-id. Might be useful at some point or for troubleshooting
 );
 
+ALTER TABLE cancellation ADD CONSTRAINT unique_cancellation_constraint UNIQUE (status, start_date, route_id, direction_id, start_time);
+
 CREATE INDEX cancellation_start_date_time_idx ON cancellation(start_date, start_time);
 CREATE INDEX cancellation_trip_identifier_tuple_idx ON cancellation(start_date, route_id, direction_id, start_time);
 
