@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/HSLdevcom/transitlog-event-source.svg?branch=master)](https://travis-ci.org/HSLdevcom/transitlog-event-source)
+[![Build Status](https://travis-ci.org/HSLdevcom/transitlog-cancellation-writer.svg?branch=master)](https://travis-ci.org/HSLdevcom/transitlog-cancellation-writer)
 
 ## Description
 
@@ -11,7 +11,7 @@ These events are f.ex trip cancellations, service alerts, etc.
 Setup the PostgreSQL database using the [db-init-script](schema/init.sql):
 
 ```   
-psql -h localhost -d template1 -U postgres -f ./schema/init.sql 
+psql -h localhost -d template1 -U postgres -f ./schema/init.sql
 ```   
 
 ## Building

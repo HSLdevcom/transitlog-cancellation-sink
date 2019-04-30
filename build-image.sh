@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -t hsldevcom/transitlog-event-source .
+docker build -t hsldevcom/transitlog-cancellation-writer .
