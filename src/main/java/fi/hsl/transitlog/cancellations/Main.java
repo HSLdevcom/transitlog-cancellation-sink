@@ -12,7 +12,7 @@ public class Main {
 
 
     public static void main(String[] args) {
-        log.info("Launching Transitlog-cancellation-writer.");
+        log.info("Launching transitlog-cancellation-sink.");
 
         Config config = ConfigParser.createConfig();
 
