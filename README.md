@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/HSLdevcom/transitlog-cancellation-writer.svg?branch=master)](https://travis-ci.org/HSLdevcom/transitlog-cancellation-writer)
+[![Build Status](https://travis-ci.org/HSLdevcom/transitlog-cancellation-sink.svg?branch=master)](https://travis-ci.org/HSLdevcom/transitlog-cancellation-sink)
 
 ## Description
 
