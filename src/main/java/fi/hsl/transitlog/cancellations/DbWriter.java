@@ -1,5 +1,8 @@
 package fi.hsl.transitlog.cancellations;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.typesafe.config.Config;
 import fi.hsl.common.transitdata.proto.InternalMessages;
 import org.slf4j.Logger;
@@ -35,9 +38,10 @@ public class DbWriter {
                 .append("route_id, ")
                 .append("direction_id, ")
                 .append("start_time, ")
+                .append("data, ")
                 .append("ext_id_dvj")
                 .append(") VALUES (")
-                .append("?::CANCELLATION_STATUS, ?, ?, ?, ?, ?")
+                .append("?::CANCELLATION_STATUS, ?, ?, ?, ?, ?::JSON, ?")
                 .append(") ON CONFLICT DO NOTHING;") // Let's just ignore duplicates
                 .toString();
     }
@@ -56,6 +60,10 @@ public class DbWriter {
             setNullable(index++, cancellation.getRouteId(), Types.VARCHAR, statement);
             setNullable(index++, cancellation.getDirectionId(), Types.INTEGER, statement);
             setNullable(index++, cancellation.getStartTime(), Types.VARCHAR, statement);
+
+            final JsonNode json = createJsonData(cancellation);
+            setNullable(index++, json.toString(), Types.VARCHAR, statement);
+
             setNullable(index++, cancellation.getTripId(), Types.VARCHAR, statement);
             statement.execute();
         }
@@ -67,6 +75,17 @@ public class DbWriter {
             long elapsed = System.currentTimeMillis() - startTime;
             log.info("Total insert time: {} ms", elapsed);
         }
+    }
+
+    public static ObjectNode createJsonData(final InternalMessages.TripCancellation cancellation) {
+        final ObjectNode json = JsonNodeFactory.instance.objectNode();
+        json.put("deviation_cases_type", cancellation.getDeviationCasesType().toString());
+        json.put("affected_departures_type", cancellation.getAffectedDeparturesType().toString());
+        json.put("title", cancellation.getTitle());
+        json.put("description", cancellation.getDescription());
+        json.put("category", cancellation.getCategory().toString());
+        json.put("sub_category", cancellation.getSubCategory().toString());
+        return json;
     }
 
     Date parseDateFromCancellation(String dateString) throws ParseException {
