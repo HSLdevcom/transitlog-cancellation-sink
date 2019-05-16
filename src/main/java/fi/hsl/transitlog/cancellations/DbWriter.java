@@ -11,10 +11,14 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 
 public class DbWriter {
     private static final Logger log = LoggerFactory.getLogger(DbWriter.class);
+    private static Calendar calendar;
 
     Connection connection;
 
@@ -23,6 +27,9 @@ public class DbWriter {
     }
 
     public static DbWriter newInstance(Config config, final String connectionString) throws Exception {
+        final String timeZone = config.getString("db.timezone");
+        calendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+
         log.info("Connecting to the database");
         Connection conn = DriverManager.getConnection(connectionString);
         conn.setAutoCommit(true);
@@ -38,16 +45,16 @@ public class DbWriter {
                 .append("route_id, ")
                 .append("direction_id, ")
                 .append("start_time, ")
+                .append("last_modified, ")
                 .append("data, ")
                 .append("ext_id_dvj")
                 .append(") VALUES (")
-                .append("?::CANCELLATION_STATUS, ?, ?, ?, ?, ?::JSON, ?")
+                .append("?::CANCELLATION_STATUS, ?, ?, ?, ?, ?, ?::JSON, ?")
                 .append(") ON CONFLICT DO NOTHING;") // Let's just ignore duplicates
                 .toString();
     }
 
-    public void insert(InternalMessages.TripCancellation cancellation) throws Exception {
-
+    public void insert(InternalMessages.TripCancellation cancellation, final long lastModified) throws Exception {
         long startTime = System.currentTimeMillis();
         String queryString = createInsertStatement();
         try (PreparedStatement statement = connection.prepareStatement(queryString)) {
@@ -60,6 +67,7 @@ public class DbWriter {
             setNullable(index++, cancellation.getRouteId(), Types.VARCHAR, statement);
             setNullable(index++, cancellation.getDirectionId(), Types.INTEGER, statement);
             setNullable(index++, cancellation.getStartTime(), Types.VARCHAR, statement);
+            setNullable(index++, Timestamp.from(Instant.ofEpochMilli(lastModified)), Types.TIMESTAMP_WITH_TIMEZONE, statement);
 
             final JsonNode json = createJsonData(cancellation);
             setNullable(index++, json.toString(), Types.VARCHAR, statement);
@@ -113,6 +121,8 @@ public class DbWriter {
                 case Types.DATE: statement.setDate(index, (Date)value);
                     break;
                 case Types.TIME: statement.setTime(index, (Time)value);
+                    break;
+                case Types.TIMESTAMP_WITH_TIMEZONE: statement.setTimestamp(index, (Timestamp)value, calendar);
                     break;
                 case Types.VARCHAR: statement.setString(index, (String)value); //Not sure if this is correct, field in schema is TEXT
                     break;
