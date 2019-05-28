@@ -15,6 +15,9 @@ CREATE TABLE cancellation (
     route_id              TEXT,
     direction_id          SMALLINT,
     start_time            TEXT, -- String hhmmss 30 hour clock?
+    last_modified         TIMESTAMPTZ, -- OMM modification timestamp
+    json_schema_version   SMALLINT DEFAULT 1,
+    data                  jsonb,
     ext_id_dvj            TEXT -- Optional field for dvj-id. Might be useful at some point or for troubleshooting
 );
 
