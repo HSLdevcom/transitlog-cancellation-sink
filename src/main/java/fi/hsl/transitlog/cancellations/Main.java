@@ -19,7 +19,7 @@ public class Main {
 
         log.info("Configuration read, launching the main loop");
         DbWriterTripCancellation cancellationWriter = null;
-        DbWriterPartialCancellation partialCancellationWriter = null;
+        DbWriterStopCancellation stopCancellationWriter = null;
 
         try (PulsarApplication app = PulsarApplication.newInstance(config)) {
 
@@ -35,8 +35,8 @@ public class Main {
             log.info("Connection success");
 
             cancellationWriter = DbWriterTripCancellation.newInstance(config, conn);
-            partialCancellationWriter = DbWriterPartialCancellation.newInstance(config, conn);
-            MessageProcessor processor = new MessageProcessor(app, cancellationWriter, partialCancellationWriter);
+            stopCancellationWriter = DbWriterStopCancellation.newInstance(config, conn);
+            MessageProcessor processor = new MessageProcessor(app, cancellationWriter, stopCancellationWriter);
             log.info("Starting to process messages");
 
             app.launchWithHandler(processor);

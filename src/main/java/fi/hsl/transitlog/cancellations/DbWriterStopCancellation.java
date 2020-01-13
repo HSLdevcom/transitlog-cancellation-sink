@@ -1,8 +1,5 @@
 package fi.hsl.transitlog.cancellations;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.typesafe.config.Config;
 import fi.hsl.common.transitdata.proto.InternalMessages;
 import org.slf4j.Logger;
@@ -16,25 +13,25 @@ import java.util.Calendar;
 import java.util.TimeZone;
 
 
-public class DbWriterPartialCancellation {
-    private static final Logger log = LoggerFactory.getLogger(DbWriterPartialCancellation.class);
+public class DbWriterStopCancellation {
+    private static final Logger log = LoggerFactory.getLogger(DbWriterStopCancellation.class);
     private static Calendar calendar;
 
     Connection connection;
 
-    private DbWriterPartialCancellation(Connection conn) {
+    private DbWriterStopCancellation(Connection conn) {
         connection = conn;
     }
 
-    public static DbWriterPartialCancellation newInstance(Config config, Connection conn)  {
+    public static DbWriterStopCancellation newInstance(Config config, Connection conn)  {
         final String timeZone = config.getString("db.timezone");
         calendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
-        return new DbWriterPartialCancellation(conn);
+        return new DbWriterStopCancellation(conn);
     }
 
     private String createInsertStatement() {
         return new StringBuffer()
-                .append("INSERT INTO CANCELLATIONPARTIAL (")
+                .append("INSERT INTO STOPCANCELLATION (")
                 .append("status, ")
                 .append("operating_date, ")
                 .append("route_id, ")
@@ -45,7 +42,7 @@ public class DbWriterPartialCancellation {
                 .append("last_modified, ")
                 .append("ext_id_dvj")
                 .append(") VALUES (")
-                .append("?::PARTIAL_CANCELLATION_STATUS, ?, ?, ?, ?, ?, ?, ?, ?")
+                .append("?::STOP_CANCELLATION_STATUS, ?, ?, ?, ?, ?, ?, ?, ?")
                 .append(") ON CONFLICT DO NOTHING;") // Let's just ignore duplicates
                 .toString();
     }
@@ -70,12 +67,12 @@ public class DbWriterPartialCancellation {
             statement.execute();
         }
         catch (Exception e) {
-            log.error("Failed to insert partial cancellation to database: ", e);
+            log.error("Failed to insert stop cancellation to database: ", e);
             throw e;
         }
         finally {
             long elapsed = System.currentTimeMillis() - startTime;
-            log.info("Inserted partial cancellation, total insert time: {} ms", elapsed);
+            log.info("Inserted stop cancellation, total insert time: {} ms", elapsed);
         }
     }
 

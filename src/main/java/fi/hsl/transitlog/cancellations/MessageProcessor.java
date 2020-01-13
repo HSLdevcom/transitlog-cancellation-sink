@@ -17,12 +17,12 @@ public class MessageProcessor implements IMessageHandler {
     private static final Logger log = LoggerFactory.getLogger(MessageProcessor.class);
 
     final DbWriterTripCancellation tripCancellationWriter;
-    final DbWriterPartialCancellation partialCancellationWriter;
+    final DbWriterStopCancellation stopCancellationWriter;
     private final Consumer<byte[]> consumer;
 
-    public MessageProcessor(PulsarApplication app, DbWriterTripCancellation tripCancellationWriter, DbWriterPartialCancellation partialCancellationWriter) {
+    public MessageProcessor(PulsarApplication app, DbWriterTripCancellation tripCancellationWriter, DbWriterStopCancellation stopCancellationWriter) {
         this.tripCancellationWriter = tripCancellationWriter;
-        this.partialCancellationWriter = partialCancellationWriter;
+        this.stopCancellationWriter = stopCancellationWriter;
         consumer = app.getContext().getConsumer();
     }
 
@@ -36,12 +36,12 @@ public class MessageProcessor implements IMessageHandler {
             InternalMessages.StopEstimate stopEstimate = InternalMessages.StopEstimate.parseFrom(message.getData());
             switch (stopEstimate.getStatus()) {
                 case SKIPPED:
-                    partialCancellationWriter.insert(stopEstimate, message.getEventTime());
+                    stopCancellationWriter.insert(stopEstimate, message.getEventTime());
                     break;
                 case SCHEDULED:
                     //TODO check if this is a cancellation of cancellation (i.e. stop won't be skipped after all)
                     // keep skipped stop estimates in e.g. redis cache for checking this, insert scheduled stopEstimate if it was skipped before
-                    // partialWriter.insert(stopEstimate, message.getEventTime());
+                    // stopCancellationWriter.insert(stopEstimate, message.getEventTime());
                     break;
                 default:
                     break;
