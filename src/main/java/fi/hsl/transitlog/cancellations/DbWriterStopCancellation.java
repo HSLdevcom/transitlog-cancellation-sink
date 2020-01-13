@@ -33,6 +33,7 @@ public class DbWriterStopCancellation {
         return new StringBuffer()
                 .append("INSERT INTO STOPCANCELLATION (")
                 .append("status, ")
+                .append("stop_estimate_type, ")
                 .append("operating_date, ")
                 .append("route_id, ")
                 .append("direction_id, ")
@@ -42,7 +43,7 @@ public class DbWriterStopCancellation {
                 .append("last_modified, ")
                 .append("ext_id_dvj")
                 .append(") VALUES (")
-                .append("?::STOP_CANCELLATION_STATUS, ?, ?, ?, ?, ?, ?, ?, ?")
+                .append("?::STOP_CANCELLATION_STATUS, ?::STOP_ESTIMATE_TYPE, ?, ?, ?, ?, ?, ?, ?, ?")
                 .append(") ON CONFLICT DO NOTHING;") // Let's just ignore duplicates
                 .toString();
     }
@@ -54,7 +55,7 @@ public class DbWriterStopCancellation {
             int index = 1;
 
             statement.setString(index++, stopEstimate.getStatus().toString());
-
+            statement.setString(index++, stopEstimate.getType().toString());
             Date operatingDate = parseDateFromString(stopEstimate.getTripInfo().getOperatingDay());
             setNullable(index++, operatingDate, Types.DATE, statement);
             setNullable(index++, stopEstimate.getTripInfo().getRouteId(), Types.VARCHAR, statement);
