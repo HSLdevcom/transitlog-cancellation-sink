@@ -16,33 +16,20 @@ import java.util.Calendar;
 import java.util.TimeZone;
 
 
-public class DbWriter {
-    private static final Logger log = LoggerFactory.getLogger(DbWriter.class);
+public class DbWriterTripCancellation {
+    private static final Logger log = LoggerFactory.getLogger(DbWriterTripCancellation.class);
     private static Calendar calendar;
 
     Connection connection;
 
-    private DbWriter(Connection conn) {
+    private DbWriterTripCancellation(Connection conn) {
         connection = conn;
     }
 
-    public static DbWriter newInstance(Config config) throws Exception {
+    public static DbWriterTripCancellation newInstance(Config config, Connection conn)  {
         final String timeZone = config.getString("db.timezone");
         calendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
-
-        final String dbAddress = config.getString("db.address");
-        log.info("Connecting to database: "+ dbAddress);
-
-        final String dbUsername = System.getProperty("db.username");
-        final String dbPassword = System.getProperty("db.password");
-
-        final String connectionString = "jdbc:postgresql://" + dbAddress + "/citus?user=" + dbUsername
-                + "&sslmode=require&reWriteBatchedInserts=true&password="+ dbPassword;
-
-        Connection conn = DriverManager.getConnection(connectionString);
-        conn.setAutoCommit(true);
-        log.info("Connection success");
-        return new DbWriter(conn);
+        return new DbWriterTripCancellation(conn);
     }
 
     private String createInsertStatement() {
