@@ -1,12 +1,10 @@
-
-FROM openjdk:8-jre-slim
-
+FROM eclipse-temurin:11-alpine
 #Install curl for health check
-RUN apt-get update && apt-get install -y --no-install-recommends curl
+RUN apk add --no-cache curl
 
 #This container can access the build artifacts inside the BUILD container.
 #Everything that is not copied is discarded
-ADD target/transitlog-cancellation-sink.jar /usr/app/transitlog-cancellation-sink.jar
+ADD target/transitlog-cancellation-sink-jar-with-dependencies.jar /usr/app/transitlog-cancellation-sink.jar
 COPY run /run
 COPY start-application.sh /
 RUN chmod +x /start-application.sh
