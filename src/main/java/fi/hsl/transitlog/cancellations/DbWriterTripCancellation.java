@@ -5,12 +5,11 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.typesafe.config.Config;
 import fi.hsl.common.transitdata.proto.InternalMessages;
+import fi.hsl.transitlog.cancellations.utils.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -57,7 +56,7 @@ public class DbWriterTripCancellation {
 
             statement.setString(index++, cancellation.getStatus().toString());
 
-            Date startDate = parseDateFromCancellation(cancellation.getStartDate());
+            Date startDate = DateUtils.parseDate(cancellation.getStartDate());
             setNullable(index++, startDate, Types.DATE, statement);
             setNullable(index++, cancellation.getRouteId(), Types.VARCHAR, statement);
             setNullable(index++, cancellation.getDirectionId(), Types.INTEGER, statement);
@@ -91,12 +90,6 @@ public class DbWriterTripCancellation {
         return json;
     }
 
-    Date parseDateFromCancellation(String dateString) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        java.util.Date date = sdf.parse(dateString);
-        return new java.sql.Date(date.getTime());
-    }
-
     private void setNullable(int index, Object value, int jdbcType, PreparedStatement statement) throws SQLException {
         if (value == null) {
             statement.setNull(index, jdbcType);
@@ -105,21 +98,29 @@ public class DbWriterTripCancellation {
             //This is just awful but Postgres driver does not support setObject(value, type);
             //Leaving null values not set is also not an option.
             switch (jdbcType) {
-                case Types.BOOLEAN: statement.setBoolean(index, (Boolean)value);
+                case Types.BOOLEAN:
+                    statement.setBoolean(index, (Boolean)value);
                     break;
-                case Types.INTEGER: statement.setInt(index, (Integer) value);
+                case Types.INTEGER:
+                    statement.setInt(index, (Integer) value);
                     break;
-                case Types.BIGINT: statement.setLong(index, (Long)value);
+                case Types.BIGINT:
+                    statement.setLong(index, (Long)value);
                     break;
-                case Types.DOUBLE: statement.setDouble(index, (Double) value);
+                case Types.DOUBLE:
+                    statement.setDouble(index, (Double) value);
                     break;
-                case Types.DATE: statement.setDate(index, (Date)value);
+                case Types.DATE:
+                    statement.setDate(index, (Date)value);
                     break;
-                case Types.TIME: statement.setTime(index, (Time)value);
+                case Types.TIME:
+                    statement.setTime(index, (Time)value);
                     break;
-                case Types.TIMESTAMP_WITH_TIMEZONE: statement.setTimestamp(index, (Timestamp)value, calendar);
+                case Types.TIMESTAMP_WITH_TIMEZONE:
+                    statement.setTimestamp(index, (Timestamp)value, calendar);
                     break;
-                case Types.VARCHAR: statement.setString(index, (String)value); //Not sure if this is correct, field in schema is TEXT
+                case Types.VARCHAR:
+                    statement.setString(index, (String)value); //Not sure if this is correct, field in schema is TEXT
                     break;
                 default: log.error("Invalid jdbc type, bug in the app! {}", jdbcType);
                     break;
