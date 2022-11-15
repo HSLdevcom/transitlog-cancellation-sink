@@ -13,26 +13,50 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MessageProcessor implements IMessageHandler {
-
     private static final Logger log = LoggerFactory.getLogger(MessageProcessor.class);
 
-    final DbWriter writer;
+    private final DbWriterTripCancellation tripCancellationWriter;
+    private final DbWriterStopCancellation stopCancellationWriter;
     private final Consumer<byte[]> consumer;
 
-    public MessageProcessor(PulsarApplication app, DbWriter w) {
-        writer = w;
+    private final boolean stopCancellationsEnabled;
+
+    public MessageProcessor(PulsarApplication app, DbWriterTripCancellation tripCancellationWriter, DbWriterStopCancellation stopCancellationWriter) {
+        this.tripCancellationWriter = tripCancellationWriter;
+        this.stopCancellationWriter = stopCancellationWriter;
+
         consumer = app.getContext().getConsumer();
+
+        stopCancellationsEnabled = app.getContext().getConfig().getBoolean("application.stopCancellationsEnabled");
     }
 
     @Override
     public void handleMessage(Message message) throws Exception {
         if (TransitdataSchema.hasProtobufSchema(message, TransitdataProperties.ProtobufSchema.InternalMessagesTripCancellation)) {
             InternalMessages.TripCancellation cancellation = InternalMessages.TripCancellation.parseFrom(message.getData());
-            writer.insert(cancellation, message.getEventTime());
+            tripCancellationWriter.insert(cancellation, message.getEventTime());
+        } else if (TransitdataSchema.hasProtobufSchema(message, TransitdataProperties.ProtobufSchema.InternalMessagesStopEstimate)) {
+            if (stopCancellationsEnabled) {
+                InternalMessages.StopEstimate stopEstimate = InternalMessages.StopEstimate.parseFrom(message.getData());
+                switch (stopEstimate.getStatus()) {
+                    case SKIPPED:
+                        stopCancellationWriter.insert(stopEstimate, message.getEventTime());
+                        break;
+                    case SCHEDULED:
+                        //TODO check if this is a cancellation of cancellation (i.e. stop won't be skipped after all)
+                        // keep skipped stop estimates in e.g. redis cache for checking this, insert scheduled stopEstimate if it was skipped before
+                        // stopCancellationWriter.insert(stopEstimate, message.getEventTime());
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                log.debug("Stop cancellations not enabled, not writing stop cancellation to DB");
+            }
+        } else {
+            log.warn("Invalid protobuf schema: {}", TransitdataSchema.parseFromPulsarMessage(message).orElse(null));
         }
-        else {
-            log.warn("Invalid protobuf schema");
-        }
+
         ack(message.getMessageId());
     }
 
@@ -44,5 +68,4 @@ public class MessageProcessor implements IMessageHandler {
                 })
                 .thenRun(() -> {});
     }
-
 }
