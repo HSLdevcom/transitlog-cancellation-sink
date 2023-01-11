@@ -16,7 +16,7 @@ public class DbWriterStopCancellation {
     private static final Logger log = LoggerFactory.getLogger(DbWriterStopCancellation.class);
     private static Calendar calendar;
 
-    Connection connection;
+    private final Connection connection;
 
     private DbWriterStopCancellation(Connection conn) {
         connection = conn;
