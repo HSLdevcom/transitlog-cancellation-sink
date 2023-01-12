@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -29,22 +30,21 @@ public class DbWriterStopCancellation {
     }
 
     private String createInsertStatement() {
-        return new StringBuffer()
-                .append("INSERT INTO STOPCANCELLATION (")
-                .append("status, ")
-                .append("stop_estimate_type, ")
-                .append("operating_date, ")
-                .append("route_id, ")
-                .append("direction_id, ")
-                .append("start_time, ")
-                .append("stop_id, ")
-                .append("stop_sequence, ")
-                .append("last_modified, ")
-                .append("ext_id_dvj")
-                .append(") VALUES (")
-                .append("?::STOP_CANCELLATION_STATUS, ?::STOP_ESTIMATE_TYPE, ?, ?, ?, ?, ?, ?, ?, ?")
-                .append(") ON CONFLICT DO NOTHING;") // Let's just ignore duplicates
-                .toString();
+        return "INSERT INTO STOPCANCELLATION (" +
+                "status, " +
+                "stop_estimate_type, " +
+                "operating_date, " +
+                "route_id, " +
+                "direction_id, " +
+                "start_time, " +
+                "stop_id, " +
+                "stop_sequence, " +
+                "last_modified, " +
+                "ext_id_dvj" +
+                ") VALUES (" +
+                "?::STOP_CANCELLATION_STATUS, ?::STOP_ESTIMATE_TYPE, ?, ?, ?, ?, ?, ?, ?, ?" +
+                ") ON CONFLICT DO NOTHING;" // Let's just ignore duplicates
+                ;
     }
 
     public void insert(InternalMessages.StopEstimate stopEstimate, final long lastModified) throws Exception {
@@ -55,7 +55,7 @@ public class DbWriterStopCancellation {
 
             statement.setString(index++, stopEstimate.getStatus().toString());
             statement.setString(index++, stopEstimate.getType().toString());
-            Date operatingDate = DateUtils.parseDate(stopEstimate.getTripInfo().getOperatingDay());
+            final LocalDate operatingDate = DateUtils.parseDate(stopEstimate.getTripInfo().getOperatingDay());
             setNullable(index++, operatingDate, Types.DATE, statement);
             setNullable(index++, stopEstimate.getTripInfo().getRouteId(), Types.VARCHAR, statement);
             setNullable(index++, stopEstimate.getTripInfo().getDirectionId(), Types.INTEGER, statement);
@@ -97,7 +97,7 @@ public class DbWriterStopCancellation {
                     statement.setDouble(index, (Double) value);
                     break;
                 case Types.DATE:
-                    statement.setDate(index, (Date)value);
+                    statement.setObject(index, value, Types.DATE);
                     break;
                 case Types.TIME:
                     statement.setTime(index, (Time)value);
