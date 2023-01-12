@@ -27,7 +27,7 @@ public class DbWriterTripCancellation {
         this.timezone = timezone;
         this.connection = connection;
 
-        sqlStatement = FileUtils.readFileFromStreamOrThrow(getClass().getResourceAsStream("trip_cancellation.sql"));
+        sqlStatement = FileUtils.readFileFromStreamOrThrow(getClass().getClassLoader().getResourceAsStream("trip_cancellation.sql"));
     }
 
     public static DbWriterTripCancellation newInstance(Config config, Connection conn) throws Exception {
