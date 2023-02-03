@@ -1,4 +1,4 @@
-#[![Build Status](https://travis-ci.org/HSLdevcom/transitlog-cancellation-sink.svg?branch=master)](https://travis-ci.org/HSLdevcom/transitlog-cancellation-sink)
+# transitlog-cancellation-sink [![Test and create Docker image](https://github.com/HSLdevcom/transitlog-cancellation-sink/actions/workflows/test-and-build.yml/badge.svg)](https://github.com/HSLdevcom/transitlog-cancellation-sink/actions/workflows/test-and-build.yml)
 
 ## Description
 
