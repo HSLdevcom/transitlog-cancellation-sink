@@ -21,7 +21,8 @@ public class MessageProcessor implements IMessageHandler {
 
     private final boolean stopCancellationsEnabled;
 
-    public MessageProcessor(PulsarApplication app, DbWriterTripCancellation tripCancellationWriter, DbWriterStopCancellation stopCancellationWriter) {
+    public MessageProcessor(PulsarApplication app, DbWriterTripCancellation tripCancellationWriter,
+            DbWriterStopCancellation stopCancellationWriter) {
         this.tripCancellationWriter = tripCancellationWriter;
         this.stopCancellationWriter = stopCancellationWriter;
 
@@ -32,22 +33,25 @@ public class MessageProcessor implements IMessageHandler {
 
     @Override
     public void handleMessage(Message message) throws Exception {
-        if (TransitdataSchema.hasProtobufSchema(message, TransitdataProperties.ProtobufSchema.InternalMessagesTripCancellation)) {
-            InternalMessages.TripCancellation cancellation = InternalMessages.TripCancellation.parseFrom(message.getData());
+        if (TransitdataSchema.hasProtobufSchema(message,
+                TransitdataProperties.ProtobufSchema.InternalMessagesTripCancellation)) {
+            InternalMessages.TripCancellation cancellation = InternalMessages.TripCancellation
+                    .parseFrom(message.getData());
             tripCancellationWriter.insert(cancellation, message.getEventTime());
-        } else if (TransitdataSchema.hasProtobufSchema(message, TransitdataProperties.ProtobufSchema.InternalMessagesStopEstimate)) {
+        } else if (TransitdataSchema.hasProtobufSchema(message,
+                TransitdataProperties.ProtobufSchema.InternalMessagesStopEstimate)) {
             if (stopCancellationsEnabled) {
                 InternalMessages.StopEstimate stopEstimate = InternalMessages.StopEstimate.parseFrom(message.getData());
                 switch (stopEstimate.getStatus()) {
-                    case SKIPPED:
+                    case SKIPPED :
                         stopCancellationWriter.insert(stopEstimate, message.getEventTime());
                         break;
-                    case SCHEDULED:
+                    case SCHEDULED :
                         //TODO check if this is a cancellation of cancellation (i.e. stop won't be skipped after all)
                         // keep skipped stop estimates in e.g. redis cache for checking this, insert scheduled stopEstimate if it was skipped before
                         // stopCancellationWriter.insert(stopEstimate, message.getEventTime());
                         break;
-                    default:
+                    default :
                         break;
                 }
             } else {
@@ -61,11 +65,10 @@ public class MessageProcessor implements IMessageHandler {
     }
 
     private void ack(MessageId received) {
-        consumer.acknowledgeAsync(received)
-                .exceptionally(throwable -> {
-                    log.error("Failed to ack Pulsar message", throwable);
-                    return null;
-                })
-                .thenRun(() -> {});
+        consumer.acknowledgeAsync(received).exceptionally(throwable -> {
+            log.error("Failed to ack Pulsar message", throwable);
+            return null;
+        }).thenRun(() -> {
+        });
     }
 }

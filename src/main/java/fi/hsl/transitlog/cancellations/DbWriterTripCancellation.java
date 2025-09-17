@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.time.*;
 
-
 public class DbWriterTripCancellation {
     private static final Logger log = LoggerFactory.getLogger(DbWriterTripCancellation.class);
 
@@ -27,7 +26,8 @@ public class DbWriterTripCancellation {
         this.timezone = timezone;
         this.connection = connection;
 
-        sqlStatement = FileUtils.readFileFromStreamOrThrow(getClass().getClassLoader().getResourceAsStream("trip_cancellation.sql"));
+        sqlStatement = FileUtils
+                .readFileFromStreamOrThrow(getClass().getClassLoader().getResourceAsStream("trip_cancellation.sql"));
     }
 
     public static DbWriterTripCancellation newInstance(Config config, Connection conn) throws Exception {
@@ -49,7 +49,8 @@ public class DbWriterTripCancellation {
             setNullable(index++, cancellation.getRouteId(), Types.VARCHAR, statement);
             setNullable(index++, cancellation.getDirectionId(), Types.INTEGER, statement);
             setNullable(index++, cancellation.getStartTime(), Types.VARCHAR, statement);
-            setNullable(index++, OffsetDateTime.ofInstant(Instant.ofEpochMilli(lastModified), timezone), Types.TIMESTAMP_WITH_TIMEZONE, statement);
+            setNullable(index++, OffsetDateTime.ofInstant(Instant.ofEpochMilli(lastModified), timezone),
+                    Types.TIMESTAMP_WITH_TIMEZONE, statement);
 
             final JsonNode json = createJsonData(cancellation);
             setNullable(index++, json.toString(), Types.VARCHAR, statement);
@@ -79,33 +80,33 @@ public class DbWriterTripCancellation {
     private void setNullable(int index, Object value, int jdbcType, PreparedStatement statement) throws SQLException {
         if (value == null) {
             statement.setNull(index, jdbcType);
-        }
-        else {
+        } else {
             //This is just awful but Postgres driver does not support setObject(value, type);
             //Leaving null values not set is also not an option.
             switch (jdbcType) {
-                case Types.BOOLEAN:
-                    statement.setBoolean(index, (Boolean)value);
+                case Types.BOOLEAN :
+                    statement.setBoolean(index, (Boolean) value);
                     break;
-                case Types.INTEGER:
+                case Types.INTEGER :
                     statement.setInt(index, (Integer) value);
                     break;
-                case Types.BIGINT:
-                    statement.setLong(index, (Long)value);
+                case Types.BIGINT :
+                    statement.setLong(index, (Long) value);
                     break;
-                case Types.DOUBLE:
+                case Types.DOUBLE :
                     statement.setDouble(index, (Double) value);
                     break;
-                case Types.DATE:
+                case Types.DATE :
                     statement.setObject(index, value, Types.DATE);
                     break;
-                case Types.TIMESTAMP_WITH_TIMEZONE:
+                case Types.TIMESTAMP_WITH_TIMEZONE :
                     statement.setObject(index, value, Types.TIMESTAMP_WITH_TIMEZONE);
                     break;
-                case Types.VARCHAR:
-                    statement.setString(index, (String)value); //Not sure if this is correct, field in schema is TEXT
+                case Types.VARCHAR :
+                    statement.setString(index, (String) value); //Not sure if this is correct, field in schema is TEXT
                     break;
-                default: log.error("Invalid JDBC type, bug in the app! {}", jdbcType);
+                default :
+                    log.error("Invalid JDBC type, bug in the app! {}", jdbcType);
                     break;
             }
         }
