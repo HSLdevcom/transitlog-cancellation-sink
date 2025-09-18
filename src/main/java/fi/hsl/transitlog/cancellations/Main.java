@@ -24,12 +24,12 @@ public class Main {
         try (PulsarApplication app = PulsarApplication.newInstance(config)) {
 
             final String dbAddress = config.getString("db.address");
-            log.info("Connecting to database: "+ dbAddress);
+            log.info("Connecting to database: " + dbAddress);
 
             final String dbUsername = System.getProperty("db.username");
             final String dbPassword = System.getProperty("db.password");
             final String connectionString = "jdbc:postgresql://" + dbAddress + "/citus?user=" + dbUsername
-                   + "&sslmode=require&reWriteBatchedInserts=true&password="+ dbPassword;
+                    + "&sslmode=require&reWriteBatchedInserts=true&password=" + dbPassword;
             Connection conn = DriverManager.getConnection(connectionString);
             conn.setAutoCommit(true);
             log.info("Connection success");
@@ -40,8 +40,7 @@ public class Main {
             log.info("Starting to process messages");
 
             app.launchWithHandler(processor);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Exception at main", e);
             if (cancellationWriter != null) {
                 cancellationWriter.close();
