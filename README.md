@@ -1,4 +1,4 @@
-# transitlog-cancellation-sink [![Test and create Docker image](https://github.com/HSLdevcom/transitlog-cancellation-sink/actions/workflows/test-and-build.yml/badge.svg)](https://github.com/HSLdevcom/transitlog-cancellation-sink/actions/workflows/test-and-build.yml)
+# transitlog-cancellation-sink [![CI/CD](https://github.com/HSLdevcom/transitlog-cancellation-sink/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/HSLdevcom/transitlog-cancellation-sink/actions/workflows/ci-cd.yml)
 
 ## Description
 
@@ -20,16 +20,18 @@ psql -h localhost -d template1 -U postgres -f ./schema/init.sql
 This project depends on [transitdata-common](https://github.com/HSLdevcom/transitdata-common) project.
 
 Either use released versions from public maven repository or build your own and install to local maven repository:
-  - ```cd transitdata-common && mvn install```  
+  - ```cd transitdata-common && ./mvnw install```
 
 ### Locally
 
-- ```mvn compile```  
-- ```mvn package```  
+- Requires Java 25.
+- Set `GITHUB_ACTOR` and `GITHUB_TOKEN` for GitHub Packages access.
+- ```./mvnw -s .mvn/settings.xml compile```
+- ```./mvnw -s .mvn/settings.xml package```
 
 ### Docker image
 
-- Run [this script](build-image.sh) to build the Docker image
+- ```DOCKER_BUILDKIT=1 docker build --secret id=github_token,env=GITHUB_TOKEN -t transitlog-cancellation-sink .```
 
 
 ## Running

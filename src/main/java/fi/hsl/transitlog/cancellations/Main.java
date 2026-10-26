@@ -26,8 +26,8 @@ public class Main {
             final String dbAddress = config.getString("db.address");
             log.info("Connecting to database: " + dbAddress);
 
-            final String dbUsername = System.getProperty("db.username");
-            final String dbPassword = System.getProperty("db.password");
+            final String dbUsername = System.getProperty("db.username", System.getenv("TRANSITLOG_TIMESCALE_USERNAME"));
+            final String dbPassword = System.getProperty("db.password", System.getenv("TRANSITLOG_TIMESCALE_PASSWORD"));
             final String connectionString = "jdbc:postgresql://" + dbAddress + "/citus?user=" + dbUsername
                     + "&sslmode=require&reWriteBatchedInserts=true&password=" + dbPassword;
             Connection conn = DriverManager.getConnection(connectionString);
