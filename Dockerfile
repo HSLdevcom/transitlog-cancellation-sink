@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # check=error=true
 
-FROM hsldevcom/infodevops-docker-base-images:1.0.2-25-java-jdk AS build
+FROM hsldevcom/infodevops-docker-base-images:1.1.1-25-java-jdk AS build
 WORKDIR /usr/app
 
 ARG GITHUB_ACTOR=github-actions
@@ -16,6 +16,6 @@ RUN --mount=type=secret,id=github_token \
     export GITHUB_ACTOR="$GITHUB_ACTOR" && \
     ./mvnw -B package -DskipTests
 
-FROM hsldevcom/infodevops-docker-base-images:1.0.2-25-java-jre
+FROM hsldevcom/infodevops-docker-base-images:1.1.1-25-java-jre
 COPY --from=build /usr/app/target/transitlog-cancellation-sink-jar-with-dependencies.jar /usr/app/transitlog-cancellation-sink.jar
-ENTRYPOINT ["java", "-XX:-UseBASE64Intrinsics", "-XX:InitialRAMPercentage=10.0", "-XX:MaxRAMPercentage=95.0", "-jar", "/usr/app/transitlog-cancellation-sink.jar"]
+ENTRYPOINT ["java", "-XX:InitialRAMPercentage=10.0", "-XX:MaxRAMPercentage=95.0", "-jar", "/usr/app/transitlog-cancellation-sink.jar"]
